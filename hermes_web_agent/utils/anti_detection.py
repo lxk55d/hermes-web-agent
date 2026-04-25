@@ -53,7 +53,6 @@ def random_mouse_path(
     
     返回 [(x, y, delay_ms), ...] 路径点序列
     """
-    import math
 
     points = []
     steps = random.randint(8, 20)

@@ -1,7 +1,7 @@
 """测试编排器 — Orchestrator 多模式执行测试"""
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 from hermes_web_agent.core.orchestrator import (
     Orchestrator,
@@ -227,7 +227,7 @@ class TestPipelineMode:
             on_partial=callback,
         )
 
-        result = await orch.execute(task)
+        await orch.execute(task)
         # 两个阶段回调（stage 0 和 stage 1）
         assert callback.call_count == 2
 

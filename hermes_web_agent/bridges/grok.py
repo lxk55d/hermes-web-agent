@@ -16,7 +16,6 @@ Grok 网页版桥接 (grok.com)
 import asyncio
 import random
 import time
-from typing import Optional
 
 from ..core.browser import BrowserEngine
 from ..core.session import SessionManager, LLMSite

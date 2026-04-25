@@ -8,7 +8,6 @@ Usage:
 """
 import argparse
 import asyncio
-import sys
 
 from .mcp.server import main as mcp_main, WebAgentMCP
 

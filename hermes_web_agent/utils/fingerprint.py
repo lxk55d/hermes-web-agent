@@ -219,11 +219,8 @@ class FingerprintManager:
           - Permissions API 保护
         """
         webgl = self.random_webgl()
-        canvas_noise = self._canvas_noise_amount()
         audio_noise = self._audio_noise_amount()
-        fonts = self.random_fonts()
         locale = self.random_locale()
-        webrtc_policy = self.random_webrtc_policy()
         cpu_cores = self._rng.choice([4, 6, 8, 10, 12, 16])
         device_memory = self._rng.choice([4, 8, 16, 32, 64])
 

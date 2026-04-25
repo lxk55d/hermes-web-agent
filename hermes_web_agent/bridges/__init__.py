@@ -7,6 +7,7 @@ from .gemini import GeminiBridge
 from .grok import GrokBridge
 from .perplexity import PerplexityBridge
 from .copilot import CopilotBridge
+from .kimi import KimiBridge
 
 __all__ = [
     "BaseBridge",
@@ -18,4 +19,5 @@ __all__ = [
     "GrokBridge",
     "PerplexityBridge",
     "CopilotBridge",
+    "KimiBridge",
 ]

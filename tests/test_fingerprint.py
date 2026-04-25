@@ -1,10 +1,9 @@
 """测试 — 指纹随机化模块"""
-import re
 import pytest
 from hermes_web_agent.utils.fingerprint import FingerprintManager
 from hermes_web_agent.utils.human_like import HumanBehaviorSimulator
 from hermes_web_agent.utils.anti_detection import (
-    random_delay, human_typing_delays, random_mouse_path,
+    human_typing_delays, random_mouse_path,
     detect_captcha, ANTI_DETECTION_JS,
 )
 
@@ -68,13 +67,11 @@ class TestFingerprintManager:
         """连续两次调用应产生不同的结果"""
         fm1 = FingerprintManager()
         fm2 = FingerprintManager()
-        cfg1 = fm1.get_browser_config()
-        cfg2 = fm2.get_browser_config()
         # 视口可能相同（随机选择），但不同的指纹ID应不同
         js1 = fm1.get_fingerprint_js()
         js2 = fm2.get_fingerprint_js()
-        assert js1 != js2
-
+        # 两个指纹JS不应完全相同
+        assert js1 != js2, "两个不同实例的指纹JS应不同"
 
 class TestHumanBehaviorSimulator:
     @pytest.mark.asyncio

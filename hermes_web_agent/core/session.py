@@ -170,6 +170,28 @@ class LLMSite:
                 "stop_button": 'button[aria-label*="stop"]',
             },
         )
+    
+    @classmethod
+    def kimi(cls) -> "LLMSite":
+        return cls(
+            name="kimi",
+            base_url="https://kimi.moonshot.cn",
+            login_url="https://kimi.moonshot.cn/login",
+            home_url="https://kimi.moonshot.cn",
+            login_selectors={
+                "email_input": 'input[type="email"], input[name="email"], input[placeholder*="邮箱"]',
+                "password_input": 'input[type="password"], input[name="password"]',
+                "submit_button": 'button[type="submit"], button:has-text("登录")',
+                "login_success_indicator": 'textarea[placeholder*="发送"], #chat-input',
+            },
+            chat_selectors={
+                "textarea": 'textarea[placeholder*="发送"], #chat-input',
+                "send_button": 'button[aria-label*="发送"]',
+                "response_container": '.markdown-body, .message-content',
+                "stop_button": 'button[aria-label*="停止"]',
+            },
+        )
+
 
     @classmethod
     def copilot(cls) -> "LLMSite":
@@ -240,6 +262,12 @@ class SessionManager:
         password = os.environ.get("GROK_PASSWORD")
         if email and password:
             self._credentials["grok"] = LLMCredentials(email=email, password=password)
+        
+        # Kimi
+        email = os.environ.get("KIMI_EMAIL")
+        password = os.environ.get("KIMI_PASSWORD")
+        if email and password:
+            self._credentials["kimi"] = LLMCredentials(email=email, password=password)
         
         # Perplexity
         email = os.environ.get("PERPLEXITY_EMAIL")

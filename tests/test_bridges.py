@@ -1,7 +1,7 @@
 """测试桥接器基类和全部桥接器 — 使用 mock 不启动真实浏览器"""
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 from hermes_web_agent.bridges.base import BaseBridge, LLMResponse
 from hermes_web_agent.bridges.chatgpt import ChatGPTBridge
@@ -11,6 +11,7 @@ from hermes_web_agent.bridges.gemini import GeminiBridge
 from hermes_web_agent.bridges.grok import GrokBridge
 from hermes_web_agent.bridges.perplexity import PerplexityBridge
 from hermes_web_agent.bridges.copilot import CopilotBridge
+from hermes_web_agent.bridges.kimi import KimiBridge
 from hermes_web_agent.core.session import SessionManager, LLMSite
 
 
@@ -157,6 +158,7 @@ class TestBaseBridge:
             "grok": ("https://grok.com", LLMSite.grok()),
             "perplexity": ("https://www.perplexity.ai", LLMSite.perplexity()),
             "copilot": ("https://copilot.microsoft.com", LLMSite.copilot()),
+            "kimi": ("https://kimi.moonshot.cn", LLMSite.kimi()),
         }
         for name, (expected_url, site) in sites.items():
             assert site.base_url == expected_url, f"{name} base_url mismatch"
@@ -282,6 +284,22 @@ class TestBridgeLoginStatus:
         assert result is True
 
 
+    @pytest.mark.asyncio
+    async def test_kimi_login_check(self, mock_engine, mock_session_mgr, mock_page):
+        """Kimi: 未登录时 URL 含 login/auth/sign_in"""
+        bridge = KimiBridge(engine=mock_engine, session_mgr=mock_session_mgr)
+        bridge._page = mock_page
+
+        mock_page.evaluate = AsyncMock(return_value="https://kimi.moonshot.cn/login")
+        result = await bridge._check_login_status()
+        assert result is False
+
+        mock_page.evaluate = AsyncMock(return_value="https://kimi.moonshot.cn")
+        mock_page.query_selector = AsyncMock(return_value=MagicMock())
+        result = await bridge._check_login_status()
+        assert result is True
+
+
 # ── Bridge send_message URL 检查 ──────────────────────────
 
 
@@ -334,6 +352,13 @@ class TestBridgeSendMessage:
     @pytest.mark.asyncio
     async def test_copilot_send_message_no_page(self, mock_engine, mock_session_mgr):
         bridge = CopilotBridge(engine=mock_engine, session_mgr=mock_session_mgr)
+        bridge._page = None
+        with pytest.raises(RuntimeError, match="浏览器未启动"):
+            await bridge.send_message("hello")
+
+    @pytest.mark.asyncio
+    async def test_kimi_send_message_no_page(self, mock_engine, mock_session_mgr):
+        bridge = KimiBridge(engine=mock_engine, session_mgr=mock_session_mgr)
         bridge._page = None
         with pytest.raises(RuntimeError, match="浏览器未启动"):
             await bridge.send_message("hello")

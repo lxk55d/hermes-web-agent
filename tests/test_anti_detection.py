@@ -1,6 +1,5 @@
 """测试反检测模块 — anti_detection.py"""
 
-import pytest
 
 from hermes_web_agent.utils.anti_detection import (
     ANTI_DETECTION_JS,

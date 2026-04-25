@@ -24,7 +24,7 @@ import os
 import random
 import re
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional, Dict, Callable
 
@@ -235,9 +235,8 @@ class ProxyPool:
         """
         try:
             import aiohttp
-            connector = aiohttp.TCPConnector()
             if proxy.protocol in ("http", "https"):
-                connector = aiohttp.TCPConnector()
+                pass
             
             t0 = time.time()
             async with aiohttp.ClientSession() as session:

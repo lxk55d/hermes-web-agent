@@ -33,7 +33,7 @@ try:
 except ImportError:
     MCP_AVAILABLE = False
 
-from ..core.browser import BrowserEngine, create_engine
+from ..core.browser import BrowserEngine
 from ..core.session import SessionManager
 from ..core.orchestrator import Orchestrator, Task, CollaborationMode
 from ..bridges.chatgpt import ChatGPTBridge

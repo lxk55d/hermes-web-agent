@@ -18,11 +18,9 @@ ChatGPT 网页版桥接
 """
 import asyncio
 import random
-import re
 import time
-from typing import Optional
 
-from ..core.browser import BrowserEngine, create_engine
+from ..core.browser import BrowserEngine
 from ..core.session import SessionManager, LLMSite
 from .base import BaseBridge, LLMResponse
 

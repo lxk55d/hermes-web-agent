@@ -10,6 +10,7 @@ from hermes_web_agent.bridges.gemini import GeminiBridge
 from hermes_web_agent.bridges.grok import GrokBridge
 from hermes_web_agent.bridges.perplexity import PerplexityBridge
 from hermes_web_agent.bridges.copilot import CopilotBridge
+from hermes_web_agent.bridges.kimi import KimiBridge
 
 
 # ── Fixtures ────────────────────────────────────────────
@@ -316,3 +317,90 @@ class TestOtherBridgesSpecific:
             result = await bridge.send_message("test")
             assert result.success is True
             assert result.content == "Copilot reply"
+
+
+class TestKimiBridgeSpecific:
+    """KimiBridge 构造、发送、新对话测试"""
+
+    def test_kimi_bridge_construction(self, mock_engine, mock_session_mgr):
+        """KimiBridge 构造后 name 正确"""
+        bridge = KimiBridge(engine=mock_engine, session_mgr=mock_session_mgr)
+        assert bridge.name == "kimi"
+        assert bridge.site.base_url == "https://kimi.moonshot.cn"
+
+    @pytest.mark.asyncio
+    async def test_kimi_send_message(self, mock_engine, mock_session_mgr, mock_page, mock_element):
+        """Kimi send_message 使用 mock 正常执行"""
+        bridge = KimiBridge(engine=mock_engine, session_mgr=mock_session_mgr)
+        bridge._page = mock_page
+
+        mock_page.evaluate = AsyncMock(side_effect=[
+            "https://kimi.moonshot.cn",
+            "Kimi 的回复内容",
+        ])
+        mock_page.query_selector = AsyncMock(return_value=mock_element)
+        mock_page.wait_for_selector = AsyncMock(return_value=mock_element)
+        with patch.object(bridge, '_wait_for_stream_complete', AsyncMock(return_value=True)):
+            result = await bridge.send_message("test")
+            assert result.success is True
+            assert result.content == "Kimi 的回复内容"
+            assert "kimi" in result.content
+
+    @pytest.mark.asyncio
+    async def test_kimi_send_message_empty_response(self, mock_engine, mock_session_mgr, mock_page, mock_element):
+        """Kimi 空回复时 success=False"""
+        bridge = KimiBridge(engine=mock_engine, session_mgr=mock_session_mgr)
+        bridge._page = mock_page
+
+        mock_page.evaluate = AsyncMock(return_value=[
+            "https://kimi.moonshot.cn",
+            "",
+        ])
+        mock_page.query_selector = AsyncMock(side_effect=[
+            mock_element,    # textarea
+            mock_element,    # send_btn
+            None,           # stop_button → completed
+        ])
+        mock_page.wait_for_selector = AsyncMock(return_value=mock_element)
+        with patch.object(bridge, '_wait_for_stream_complete', AsyncMock(return_value=True)):
+            result = await bridge.send_message("test")
+            assert result.success is False
+            assert result.content == "(空回复)"
+
+    @pytest.mark.asyncio
+    async def test_kimi_start_new_conversation(self, mock_engine, mock_session_mgr, mock_page):
+        """Kimi 开启新对话"""
+        bridge = KimiBridge(engine=mock_engine, session_mgr=mock_session_mgr)
+        bridge._page = mock_page
+        mock_engine.navigate = AsyncMock(return_value=True)
+
+        result = await bridge.start_new_conversation()
+        assert result is True
+        mock_engine.navigate.assert_called_with("https://kimi.moonshot.cn")
+
+    @pytest.mark.asyncio
+    async def test_kimi_start_new_conversation_with_selector(self, mock_engine, mock_session_mgr, mock_page, mock_element):
+        """Kimi 使用 selector 开启新对话（有 New Chat 按钮时）"""
+        bridge = KimiBridge(engine=mock_engine, session_mgr=mock_session_mgr)
+        bridge._page = mock_page
+
+        mock_page.query_selector = AsyncMock(return_value=mock_element)
+        result = await bridge.start_new_conversation()
+        assert result is True
+        mock_element.click.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_kimi_get_conversation_history(self, mock_engine, mock_session_mgr, mock_page):
+        """Kimi 获取对话历史（通过基类通用方式）"""
+        bridge = KimiBridge(engine=mock_engine, session_mgr=mock_session_mgr)
+        bridge._page = mock_page
+        history = await bridge._get_text_safe('.markdown-body', default="历史")
+        assert history == ""  # mock 默认返回空
+
+    @pytest.mark.asyncio
+    async def test_kimi_start_new_conversation_no_page(self, mock_engine, mock_session_mgr):
+        """Kimi start_new_conversation 在 page 为 None 时返回 False"""
+        bridge = KimiBridge(engine=mock_engine, session_mgr=mock_session_mgr)
+        bridge._page = None
+        result = await bridge.start_new_conversation()
+        assert result is False

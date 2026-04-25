@@ -17,7 +17,6 @@ Claude 网页版桥接
 import asyncio
 import random
 import time
-from typing import Optional
 
 from ..core.browser import BrowserEngine
 from ..core.session import SessionManager, LLMSite

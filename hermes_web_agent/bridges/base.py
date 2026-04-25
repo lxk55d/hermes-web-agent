@@ -9,10 +9,9 @@ LLM 网页版桥接基类
   5. 保持会话持续对话
 """
 import asyncio
-import re
 import time
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 from ..core.browser import BrowserEngine

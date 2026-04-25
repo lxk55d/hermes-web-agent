@@ -1,6 +1,5 @@
 """测试 tools test fixtures — MockPlaywright"""
-import asyncio
-from unittest.mock import AsyncMock, MagicMock, PropertyMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -78,8 +77,7 @@ def mock_page():
 @pytest.fixture
 def mock_engine(mock_page):
     """创建一个 mock BrowserEngine 实例"""
-    import sys
-    from unittest.mock import AsyncMock, MagicMock, PropertyMock
+    from unittest.mock import AsyncMock, MagicMock
 
     engine = MagicMock()
     engine.start = AsyncMock(return_value=mock_page)

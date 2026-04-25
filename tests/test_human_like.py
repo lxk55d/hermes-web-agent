@@ -1,8 +1,6 @@
 """测试人类行为模拟模块 — HumanBehaviorSimulator"""
 
-import math
 
-import pytest
 
 from hermes_web_agent.utils.human_like import HumanBehaviorSimulator
 
