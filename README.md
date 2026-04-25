@@ -2,14 +2,13 @@
 
 > 通过浏览器操控 LLM 网页版完成任务的工具包。**无需 API Key，使用你的订阅账号。**
 
-[![CI](https://github.com/hermes-web-agent/hermes-web-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/hermes-web-agent/hermes-web-agent/actions/workflows/ci.yml)
+[![CI](https://github.com/lxk55d/hermes-web-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/lxk55d/hermes-web-agent/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/hermes-web-agent/hermes-web-agent?style=social)](https://github.com/hermes-web-agent/hermes-web-agent)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/hermes-web-agent/hermes-web-agent/pulls)
+[![GitHub release](https://img.shields.io/github/v/release/lxk55d/hermes-web-agent)](https://github.com/lxk55d/hermes-web-agent/releases)
 [![MCP Compatible](https://img.shields.io/badge/MCP-compatible-6C47FF)](https://modelcontextprotocol.io)
 
-让 AI Agent（Hermes / Claude Code / Cursor / 任何 MCP 客户端）通过浏览器自动化登录并操控 **ChatGPT、Claude、DeepSeek** 的网页版，实现：
+让 AI Agent（Hermes / Claude Code / Cursor / 任何 MCP 客户端）通过浏览器自动化登录并操控 **ChatGPT、Claude、DeepSeek、Gemini、Grok、Perplexity、Copilot** 的网页版，实现：
 
 - 🎯 **免 API 费用** — 用 Plus/Pro 订阅额度，不用按 token 计费
 - 🔄 **多 LLM 协作** — 流水线 / 共识 / 圆桌模式，发挥各自优势
@@ -70,7 +69,7 @@ Hermes 将自动发现以下工具：
 
 | 工具 | 描述 |
 |------|------|
-| `web_agent_chat` | 向指定 LLM 发送消息（chatgpt/claude/deepseek） |
+| `web_agent_chat` | 向指定 LLM 发送消息（chatgpt/claude/deepseek/gemini/grok/perplexity/copilot） |
 | `web_agent_multi_chat` | 多个 LLM 协作（pipeline/consensus/roundtable） |
 | `web_agent_screenshot` | 截取浏览器画面 |
 | `web_agent_status` | 查看连接状态 |
@@ -142,17 +141,29 @@ hermes-web-agent/
 │   │   ├── base.py          # 桥接器基类
 │   │   ├── chatgpt.py       # ChatGPT 网页版桥接
 │   │   ├── claude.py        # Claude 网页版桥接
-│   │   └── deepseek.py      # DeepSeek 网页版桥接
+│   │   ├── deepseek.py      # DeepSeek 网页版桥接
+│   │   ├── gemini.py        # Gemini 网页版桥接
+│   │   ├── grok.py          # Grok 网页版桥接
+│   │   ├── perplexity.py    # Perplexity 网页版桥接
+│   │   └── copilot.py       # Copilot 网页版桥接
 │   ├── mcp/
 │   │   └── server.py        # MCP Server（工具注册）
 │   └── utils/
-│       └── anti_detection.py # 抗检测工具
+│       ├── anti_detection.py # 反检测策略引擎（Cloudflare/reCAPTCHA）
+│       ├── fingerprint.py   # 浏览器指纹随机化（UA/Canvas/WebGL/WebRTC）
+│       ├── human_like.py    # 人类行为模拟（打字/鼠标/滚动）
+│       ├── proxy_rotation.py# 代理轮换系统（多代理池/健康检查）
+│       └── cookie_pool.py   # Cookie池（多站点管理/自动过期持久化）
 ├── skill/
 │   └── SKILL.md             # Hermes Skill 定义
-└── examples/
-    ├── basic_chat.py        # 基础对话示例
-    ├── multi_llm_pipeline.py # 多LLM协作示例
-    └── mcp_integration.py   # MCP集成示例
+└── tests/
+    ├── conftest.py           # Mock Playwright 测试夹具
+    ├── test_bridges.py       # 桥接器基类测试
+    ├── test_fingerprint.py   # 指纹随机化测试
+    ├── test_human_like.py    # 行为模拟测试
+    ├── test_anti_detection.py# 反检测策略测试
+    ├── test_orchestrator.py  # 编排器测试
+    └── integration/          # 集成测试（需要真实浏览器）
 ```
 
 ---
@@ -168,9 +179,13 @@ Hermes Web Agent (MCP Server)
         ▼  Playwright
 Chrome 浏览器 (headless)
         │
-        ├─ chat.openai.com ──→ ChatGPT Plus/Pro
-        ├─ claude.ai      ──→ Claude Pro/Max
-        └─ chat.deepseek.com  ──→ DeepSeek
+        ├─ chatgpt.com   ──→ ChatGPT Plus/Pro
+        ├─ claude.ai     ──→ Claude Pro/Max
+        ├─ chat.deepseek.com ──→ DeepSeek
+        ├─ gemini.google.com ──→ Gemini Advanced
+        ├─ x.ai/i/grok   ──→ Grok
+        ├─ perplexity.ai ──→ Perplexity Pro
+        └─ copilot.microsoft.com ──→ GitHub Copilot
 ```
 
 ---
@@ -188,11 +203,13 @@ Chrome 浏览器 (headless)
 
 欢迎提交 PR 和 Issue！目标路线图：
 
-- [ ] Gemini 网页版桥接
-- [ ] 更多协作模式（投票、辩论）
+- [x] Gemini / Grok / Perplexity / Copilot 网页版桥接
+- [x] 浏览器指纹随机化（UA/Canvas/WebGL/WebRTC）
+- [x] 代理轮换系统（多代理池 / 健康检查）
+- [x] Cookie 池持久化系统
 - [ ] Docker 容器化部署
 - [ ] Web UI 管理界面
-- [ ] 自动 CAPTCHA 识别集成
+- [ ] 自动 CAPTCHA 识别（如 2Captcha/BestCaptchaSolver）
 - [ ] 浏览器池（多实例负载均衡）
 
 ---
