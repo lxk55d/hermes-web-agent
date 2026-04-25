@@ -129,6 +129,69 @@ class LLMSite:
             },
         )
 
+    @classmethod
+    def grok(cls) -> "LLMSite":
+        return cls(
+            name="grok",
+            base_url="https://grok.com",
+            login_url="https://grok.com",
+            home_url="https://grok.com",
+            login_selectors={
+                "email_input": 'input[name="email"]',
+                "password_input": 'input[name="password"]',
+                "submit_button": 'button[type="submit"]',
+                "login_success_indicator": 'textarea[placeholder*="问任何问题"], div[contenteditable="true"]',
+            },
+            chat_selectors={
+                "textarea": 'textarea[placeholder*="问任何问题"], div[contenteditable="true"]',
+                "send_button": 'button[aria-label*="发送"]',
+                "response_container": '.prose, .markdown, .message-content',
+                "stop_button": 'button[aria-label*="停止"]',
+            },
+        )
+
+    @classmethod
+    def perplexity(cls) -> "LLMSite":
+        return cls(
+            name="perplexity",
+            base_url="https://www.perplexity.ai",
+            login_url="https://www.perplexity.ai/auth/login",
+            home_url="https://www.perplexity.ai",
+            login_selectors={
+                "email_input": 'input[name="email"]',
+                "password_input": 'input[name="password"]',
+                "submit_button": 'button[type="submit"]',
+                "login_success_indicator": 'textarea[placeholder*="Ask"]',
+            },
+            chat_selectors={
+                "textarea": 'textarea[placeholder*="Ask"], div[contenteditable="true"]',
+                "send_button": 'button[type="submit"]',
+                "response_container": '.prose, .markdown',
+                "stop_button": 'button[aria-label*="stop"]',
+            },
+        )
+
+    @classmethod
+    def copilot(cls) -> "LLMSite":
+        return cls(
+            name="copilot",
+            base_url="https://copilot.microsoft.com",
+            login_url="https://copilot.microsoft.com",
+            home_url="https://copilot.microsoft.com",
+            login_selectors={
+                "email_input": 'input[type="email"]',
+                "password_input": 'input[type="password"]',
+                "submit_button": 'button[type="submit"]',
+                "login_success_indicator": 'textarea, #userInput',
+            },
+            chat_selectors={
+                "textarea": 'textarea, #userInput',
+                "send_button": 'button[aria-label*="Submit"]',
+                "response_container": '.response-message-content, .message-content, .prose',
+                "stop_button": 'button[aria-label*="Stop"]',
+            },
+        )
+
 
 class SessionManager:
     """
@@ -165,6 +228,30 @@ class SessionManager:
         password = os.environ.get("DEEPSEEK_PASSWORD")
         if email and password:
             self._credentials["deepseek"] = LLMCredentials(email=email, password=password)
+        
+        # Gemini
+        email = os.environ.get("GEMINI_EMAIL")
+        password = os.environ.get("GEMINI_PASSWORD")
+        if email and password:
+            self._credentials["gemini"] = LLMCredentials(email=email, password=password, auth_method="google")
+        
+        # Grok
+        email = os.environ.get("GROK_EMAIL")
+        password = os.environ.get("GROK_PASSWORD")
+        if email and password:
+            self._credentials["grok"] = LLMCredentials(email=email, password=password)
+        
+        # Perplexity
+        email = os.environ.get("PERPLEXITY_EMAIL")
+        password = os.environ.get("PERPLEXITY_PASSWORD")
+        if email and password:
+            self._credentials["perplexity"] = LLMCredentials(email=email, password=password, auth_method="google")
+        
+        # Copilot
+        email = os.environ.get("COPILOT_EMAIL")
+        password = os.environ.get("COPILOT_PASSWORD")
+        if email and password:
+            self._credentials["copilot"] = LLMCredentials(email=email, password=password)
 
     def set_credential(self, site: str, email: str, password: str, auth_method: str = "email"):
         """设置平台凭证"""

@@ -1,4 +1,4 @@
 """
 Hermes Web Agent — 项目版本信息
 """
-__version__ = "0.1.0"
+__version__ = "0.4.0"

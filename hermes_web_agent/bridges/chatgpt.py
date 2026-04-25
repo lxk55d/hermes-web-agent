@@ -178,7 +178,6 @@ class ChatGPTBridge(BaseBridge):
             await asyncio.sleep(random.uniform(0.3, 0.8))
 
             # 点击发送
-            import random
             send_btn = await self._page.query_selector(CHAT_SELECTORS["send_button"])
             if send_btn:
                 await send_btn.click()
