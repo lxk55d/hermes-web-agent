@@ -63,6 +63,32 @@ mcpServers:
     args: [mcp]
 ```
 
+### 🔗 连接 Windows Chrome（WSL2 CDP 模式）
+
+在 WSL2 中，可连接 Windows 宿主机的 Chrome 浏览器，避免 Linux Chromium 的兼容性问题。
+
+```bash
+# 1. Windows 上启动带远程调试的 Chrome
+#    使用 windows-chrome-devtools-mcp 项目脚本：
+#    https://github.com/lxk55d/windows-chrome-devtools-mcp
+
+# 2. WSL 中设置环境变量并启动
+export HERMES_WEB_CDP_URL=http://127.0.0.1:9922
+hermes-web-agent mcp
+```
+
+也可在代码中指定：
+
+```python
+engine = await create_engine(cdp_url="http://127.0.0.1:9922")
+```
+
+CDP 模式的优点：
+- ✅ 使用真实 Windows Chrome（含 Cookie、扩展、登录态）
+- ✅ 无需 `playwright install chromium`
+- ✅ 更好的反隐身能力（真实浏览器指纹）
+- ✅ 支持 `windows-chrome-devtools-mcp` 的 NAT 网络转接
+
 ### 4️⃣ 调用工具
 
 Hermes 将自动发现以下工具：
@@ -176,16 +202,17 @@ hermes-web-agent/
         ▼  MCP 协议
 Hermes Web Agent (MCP Server)
         │
-        ▼  Playwright
-Chrome 浏览器 (headless)
+        ├── Playwright → Chrome 浏览器 (headless / Linux Chromium)
+        │                    ├─ chatgpt.com   ──→ ChatGPT Plus/Pro
+        │                    ├─ claude.ai     ──→ Claude Pro/Max
+        │                    ├─ chat.deepseek.com ──→ DeepSeek
+        │                    ├─ gemini.google.com ──→ Gemini Advanced
+        │                    ├─ x.ai/i/grok   ──→ Grok
+        │                    ├─ perplexity.ai ──→ Perplexity Pro
+        │                    └─ copilot.microsoft.com ──→ GitHub Copilot
         │
-        ├─ chatgpt.com   ──→ ChatGPT Plus/Pro
-        ├─ claude.ai     ──→ Claude Pro/Max
-        ├─ chat.deepseek.com ──→ DeepSeek
-        ├─ gemini.google.com ──→ Gemini Advanced
-        ├─ x.ai/i/grok   ──→ Grok
-        ├─ perplexity.ai ──→ Perplexity Pro
-        └─ copilot.microsoft.com ──→ GitHub Copilot
+        └── Playwright → CDP 连接 → Windows Chrome (宿主机, WSL2)
+                             （通过 HERMES_WEB_CDP_URL 指定）
 ```
 
 ---

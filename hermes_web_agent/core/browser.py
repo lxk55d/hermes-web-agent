@@ -82,6 +82,7 @@ class BrowserConfig:
     navigation_timeout: int = 30000  # 30s
     action_timeout: int = 10000     # 10s
     executable_path: Optional[str] = None  # Chrome/Chromium 可执行文件路径
+    cdp_url: Optional[str] = None  # CDP 端点 URL（连接已有 Chrome 实例，如 http://127.0.0.1:9922）
     
     @classmethod
     def create_random(cls, headless: bool = False) -> "BrowserConfig":
@@ -183,6 +184,18 @@ class BrowserEngine:
         """启动浏览器并返回页面对象"""
         self._playwright = await async_playwright().start()
         
+        # ── CDP 模式：连接已有 Chrome 实例（如 Windows Chrome） ──────────
+        cdp_url = self.config.cdp_url or os.environ.get("HERMES_WEB_CDP_URL")
+        if cdp_url:
+            self._browser = await self._playwright.chromium.connect_over_cdp(cdp_url)
+            # 使用已有浏览器上下文（保留 Cookie、扩展、登录态）
+            self._context = self._browser.contexts[0] if self._browser.contexts else await self._browser.new_context()
+            self._page = await self._context.new_page()
+            self._page.set_default_navigation_timeout(self.config.navigation_timeout)
+            self._page.set_default_timeout(self.config.action_timeout)
+            return self._page
+        
+        # ── 标准模式：启动新浏览器实例 ────────────────────────────────
         launch_args = [
             "--disable-blink-features=AutomationControlled",
             "--no-sandbox",
@@ -389,11 +402,14 @@ async def create_engine(
     session_name: Optional[str] = None,
     user_data_dir: Optional[str] = None,
     proxy: Optional[str] = None,
+    cdp_url: Optional[str] = None,
 ) -> BrowserEngine:
     """快速创建并启动浏览器引擎"""
     config = BrowserConfig.create_random(headless=headless)
     if proxy:
         config.proxy = proxy
+    if cdp_url:
+        config.cdp_url = cdp_url
     
     engine = BrowserEngine(config)
     if session_name:
